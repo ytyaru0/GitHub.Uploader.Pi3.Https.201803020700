@@ -17,6 +17,7 @@ class Editor:
         if self.__repo_name != name:
             import os
             os.rename("../" + self.__repo_name, "../" + name)
+            os.path.join(os.path.dirname(self.__args.path_dir_pj), self.__repo_name)
 
     def __EditDb(self, j):
         import pytz

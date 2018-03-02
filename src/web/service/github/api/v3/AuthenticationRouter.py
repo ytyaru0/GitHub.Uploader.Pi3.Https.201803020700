@@ -20,32 +20,39 @@ class AuthenticationRouter:
         account = Db().Accounts['Accounts'].find_one(Username=username)
 
         api = Db().Apis['Apis'].find_one(HttpMethod=http_method.upper(), Endpoint=endpoint)
-        grants = [g.strip() for g in api['Grants'].split(",")]
         if None is api or None is api['AuthMethods'] or '' == api['AuthMethods'].strip():
             if None is username: return NonAuthentication()
             else: return self.__GetTokenAuth(account, grants)
             #else: return OAuthAuthentication(account['AccessToken'])
         else:
             if None is username: raise Exception('指定したユーザ {0} はDBに未登録です。登録してから実行してください。'.format(username))
-            if "Token" in api['AuthMethods']: return self.__GetTokenAuth(account, grants)
-            elif "Basic" in api['AuthMethods']: return self.__GetBasicAuth(account)
-            elif "ClientId" in api['AuthMethods']:
+            authMethods = [m.strip() for m in api['AuthMethods'].split(",")]
+            grants = [g.strip() for g in api['Grants'].split(",")]
+            print('AAAAAAAAAAAA:',authMethods)
+            print('BBBBBBBBBBBB:',grants)
+            #if 1 == len(authMethods) and '' == authMethods[0].strip(): authMethods = None
+            if 1 == len(grants) and 0 == len(grants[0].strip()): grants = None
+            print('CCCCCCCCCCCC:',grants)
+
+            if "Token" in authMethods: return self.__GetTokenAuth(account, grants)
+            elif "Basic" in authMethods: return self.__GetBasicAuth(account)
+            elif "ClientId" in authMethods:
                 raise NotImplementedError('ClientId認証は未実装です。Not implemented clientId authorization.')
             else:
-                raise NotImplementedError('ApiDBに登録された次の認証方法は未実装です。: {0} {1} {2}'.format(api['HttpMethod'], api['Endpoint'], api['AuthMethods']))
+                raise NotImplementedError('ApiDBに登録された次の認証方法は未実装です。: {0} {1} {2}'.format(api['HttpMethod'], api['Endpoint'], authMethods))
 
     def __GetBasicAuth(self, account):
         twofactor = Db().Accounts['TwoFactors'].find_one(AccountId=account['Id'])
         if twofactor is None: return BasicAuthentication(account['Username'], account['Password'])
         else: return TwoFactorAuthentication(account['Username'], account['Password'], twofactor['Secret'])
         
-    def __GetTokenAuth(self, account):
+    def __GetTokenAuth(self, account, grants):
         try: return OAuthTokenFromDatabaseAuthentication(account['Username'], grants)
-        except NotHasGrantsException as e:
+        except OAuthTokenFromDatabaseAuthentication.NotHasGrantsException as e:
             # 指定のscopeを持ったTokenを作成する（あるいは既存のTokenに権限追加しほうが？）
             basicAuth = self.__GetBasicAuth(account)
             from web.service.github.api.v3.Client import Client
-            j = Client().Authorizations.Create(scopes=scopes)
+            j = Client().Authorizations.Create(scopes=grants)
             # DBに登録する
             Db().Accounts['AccessTokens'].insert(self.__CreateRecordToken(account['Id'], j))
             return OAuthTokenFromDatabaseAuthentication(account['Username'], grants)

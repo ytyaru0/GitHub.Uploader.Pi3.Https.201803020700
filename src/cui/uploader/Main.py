@@ -88,6 +88,7 @@ class Main:
                     self.__agg.Show()
                 elif 'e' == answer or 'E' == answer:
                     self.__ConfirmEdit()
+                    break
                 elif 'd' == answer or 'D' == answer:
                     self.__ConfirmDelete()
                     break

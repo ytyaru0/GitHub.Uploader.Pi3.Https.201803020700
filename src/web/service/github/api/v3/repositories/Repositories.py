@@ -108,6 +108,7 @@ class Repositories:
             username = self.__args.username
         if None is repo_name:
             repo_name = os.path.basename(self.__args.path_dir_pj)
+        method = 'DELETE'
         endpoint = 'repos/:owner/:repo'
         #params = self.__auth.Get('DELETE', endpoint)
         params = self.__auth.Route(method, endpoint).GetRequestParameters()
@@ -131,6 +132,7 @@ class Repositories:
         if None is homepage:
             homepage = self.__args.homepage
 
+        method = 'PATCH'
         endpoint = 'repos/:owner/:repo'
         #params = self.__auth.Get('PATCH', endpoint)
         params = self.__auth.Route(method, endpoint).GetRequestParameters()
@@ -162,6 +164,7 @@ class Repositories:
             username = self.__args.username
         if None is repo_name:
             repo_name = os.path.basename(self.__args.path_dir_pj)
+        method = 'GET'
         endpoint = 'repos/:owner/:repo/languages'
         #params = self.__auth.Get('GET', endpoint)
         params = self.__auth.Route(method, endpoint).GetRequestParameters()

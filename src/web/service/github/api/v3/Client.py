@@ -2,7 +2,7 @@
 #encoding:utf-8
 import web.http.Response
 import web.service.github.api.v3.Response
-import web.service.github.api.v3.RequestParameter
+#import web.service.github.api.v3.RequestParameter
 from web.service.github.api.v3.miscellaneous.Licenses import Licenses
 from web.service.github.api.v3.repositories.Repositories import Repositories
 from web.service.github.api.v3.authorizations.Authorizations import Authorizations
@@ -12,22 +12,10 @@ from web.service.github.api.v3.users.SshKeys import SshKeys
 from web.service.github.api.v3.users.Emails import Emails
 class Client(object):
     def __init__(self, username=None, args=None):
-    #def __init__(self, authentications, args=None):
-        #self.__reqp = web.service.github.api.v3.RequestParameter.RequestParameter(authentications)
-        #self.__response = web.service.github.api.v3.Response.Response()
-        #self.__license = Licenses(self.__reqp, self.__response)
-        #self.__repos = Repositories(self.__reqp, self.__response, args)
-        #self.__authorization = Authorizations(self.__reqp, self.__response)
-        #self.__issues = Issues(self.__reqp, self.__response, args)
-        #self.__user = Users(self.__reqp, self.__response)
-        #self.__sshkey = SshKeys(self.__reqp, self.__response)
-        #self.__email = Emails(self.__reqp, self.__response)
-
         # ※ args, self.__response, の引数渡しは不要にすべき。あとで考える。
-
         self.__response = web.service.github.api.v3.Response.Response()
+        self.__auth = web.service.github.api.v3.AuthenticationRouter.AuthenticationRouter(username)
 
-        self.__auth = web.service.github.api.v3.authenticationRouter.authenticationRouter(username)
         self.__response = web.service.github.api.v3.Response.Response()
         self.__license = Licenses(self.__auth, self.__response)
         self.__repos = Repositories(self.__auth, self.__response, args)

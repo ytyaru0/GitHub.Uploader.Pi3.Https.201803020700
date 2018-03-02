@@ -31,6 +31,7 @@ class Deleter:
         repo = self.__userRepo['Repositories'].find_one(Name=self.__repo_name)
         self.__userRepo.begin()
         self.__userRepo['Languages'].delete(RepositoryId=repo['Id'])
+        self.__userRepo['Licenses'].delete(RepositoryId=repo['Id'])
         self.__userRepo['Counts'].delete(RepositoryId=repo['Id'])
         self.__userRepo['Repositories'].delete(Id=repo['Id'])
         self.__userRepo.commit()

@@ -2,7 +2,8 @@
 #encoding:utf-8
 import os.path
 import argparse
-import web.service.github.api.v3.AuthenticationsCreator
+#import web.service.github.api.v3.AuthenticationsCreator
+import web.service.github.api.v3.AuthenticationRouter
 import web.service.github.api.v3.Client
 from database.Database import Database as Db
 import cui.uploader.Main
@@ -49,11 +50,14 @@ class Main:
             th.start()
         
         # アップローダ起動
-        creator = web.service.github.api.v3.AuthenticationsCreator.AuthenticationsCreator(args.username)
-        authentications = creator.Create()
-        client = web.service.github.api.v3.Client.Client(authentications, args)
-        main = cui.uploader.Main.Main(client, args)
-        main.Run()
+        #creator = web.service.github.api.v3.AuthenticationsCreator.AuthenticationsCreator(args.username)
+        #authentications = creator.Create()
+        #client = web.service.github.api.v3.Client.Client(authentications, args)
+        #main = cui.uploader.Main.Main(client, args)
+        #main.Run()
+        client = web.service.github.api.v3.Client.Client(args.username, args)
+        main = cui.uploader.Main.Main(client, args).Run()
+
 
 class ContributionsThread(threading.Thread):
     def __init__(self, path_dir_db, usernames):
