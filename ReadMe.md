@@ -8,6 +8,8 @@ AuthenticationsCreatorはClient作成時に呼び出していた。しかし、A
 
 * Endpointクラス作成
 * 認証を作り変えた（AuthenticationRouter.py） [修正ログ](memo/修正ログ_20180302090000.md)
+* Uploader.pyで新規作成、編集、削除ができた（sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread.発生中）
+* DBの名前を変更 `GitHub.{}`を`Github.{}`に変更
 
 # 修正概要
 

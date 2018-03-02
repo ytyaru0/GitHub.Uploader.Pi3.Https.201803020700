@@ -51,7 +51,8 @@ class DbInitializer(metaclass=ABCMeta):
     @property
     def DbId(self): return self.__class__.__name__.replace(super().__thisclass__.__name__, '')
     @property
-    def DbFileName(self): return 'GitHub.' + self.DbId + '.sqlite3'
+    def DbFileName(self): return 'Github.' + self.DbId + '.sqlite3'
+    #def DbFileName(self): return 'GitHub.' + self.DbId + '.sqlite3'
     @property
     def DbFilePath(self):
         #print(dir(self.__setting))

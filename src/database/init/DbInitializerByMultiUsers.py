@@ -69,7 +69,8 @@ class DbInitializerByMultiUsers(DbInitializer):
 
     def __CreateFilenames(self):
         for username in self.__GetUsernames():
-            self.__filenames[username] = 'GitHub.{0}.{1}.sqlite3'.format(self.DbId, username)
+            self.__filenames[username] = 'Github.{0}.{1}.sqlite3'.format(self.DbId, username)
+            #self.__filenames[username] = 'GitHub.{0}.{1}.sqlite3'.format(self.DbId, username)
 
     def __GetUsernames(self):
         #print(self.__accountsDb)
