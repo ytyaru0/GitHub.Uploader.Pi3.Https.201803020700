@@ -8,9 +8,11 @@ import datetime
 import web.http.Paginator
 #import web.http.Response
 import web.service.github.api.v3.Response
+from web.service.github.uri.Endpoint import Endpoint
+
 class Licenses:
-    def __init__(self, reqp, response):
-        self.__reqp = reqp
+    def __init__(self, auth, response):
+        self.__auth = auth
         self.__response = response
 
     """
@@ -20,12 +22,16 @@ class Licenses:
     """
     def GetLicenses(self):
         licenses = []
-        url = 'https://api.github.com/licenses'
-        params = self.__reqp.Get('GET', 'licenses')
+        method = 'GET'
+        endpoint = 'licenses'
+        #url = 'https://api.github.com/licenses'
+        #params = self.__auth.Get('GET', 'licenses')
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         params['headers']['Accept'] = 'application/vnd.github.drax-preview+json'
 #        paginator = web.http.Paginator(web.service.github.api.v3.Response.Response(web.http.Response.Response()))
 #        paginator = web.http.Paginator(web.service.github.api.v3.Response.Response())
         paginator = web.http.Paginator.Paginator(web.service.github.api.v3.Response.Response())
+        url = Endpoint(endpoint).ToUrl()
         return paginator.Paginate(url, **params)
         """
         while (None is not url):
@@ -40,9 +46,13 @@ class Licenses:
     @return {dict}   結果(JSON)
     """
     def GetLicense(self, key):
-        url = 'https://api.github.com/licenses/' + key
-        params = self.__reqp.Get('GET', 'licenses/:license')
+        method = 'GET'
+        endpoint = 'licenses/:license'
+        #url = 'https://api.github.com/licenses/' + key
+        #params = self.__auth.Get('GET', 'licenses/:license')
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         params['headers']['Accept'] = 'application/vnd.github.drax-preview+json'
+        url = Endpoint(endpoint).ToUrl(license=key)
         r = requests.get(url, **params)
         return self.__response.Get(r)
 
@@ -53,9 +63,13 @@ class Licenses:
     @return {dict}   結果(JSON形式)
     """
     def GetRepositoryLicense(self, username, repo_name):
-        url = 'https://api.github.com/repos/{0}/{1}'.format(username, repo_name)
-        params = self.__reqp.Get('GET', 'repos/:owner/:repo')
+        method = 'GET'
+        endpoint = 'repos/:owner/:repo'
+        #url = 'https://api.github.com/repos/{0}/{1}'.format(username, repo_name)
+        #params = self.__auth.Get('GET', 'repos/:owner/:repo')
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         params['headers']['Accept'] = 'application/vnd.github.drax-preview+json'
+        url = Endpoint(endpoint).ToUrl(owner=username, repo=repo_name)
         r = requests.get(url, **params)
         return self.__response.Get(r)
 

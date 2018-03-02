@@ -7,6 +7,7 @@ AuthenticationsCreatorはClient作成時に呼び出していた。しかし、A
 たとえばAccessToken作成時はBasic認証必須であり、Token認証では実行できない。大抵はToken認証でOKだが、この認証方法の選別を呼出側で共通化した。
 
 * Endpointクラス作成
+* 認証を作り変えた（AuthenticationRouter.py） [修正ログ](memo/修正ログ_20180302090000.md)
 
 # 修正概要
 

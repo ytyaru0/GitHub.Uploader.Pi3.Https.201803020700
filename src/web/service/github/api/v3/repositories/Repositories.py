@@ -6,21 +6,26 @@ import json
 import os.path
 import web.http.Paginator
 import web.service.github.api.v3.Response
-import web.log.Log
+from web.log.Log import Log
+from web.service.github.uri.Endpoint import Endpoint
+
 class Repositories:
-    def __init__(self, reqp, response, args):
-        self.__reqp = reqp
+    def __init__(self, auth, response, args):
+        self.__auth = auth
         self.__response = response
         self.__args = args
 
     def create(self, name, description=None, homepage=None):
         method = 'POST'
         endpoint = 'user/repos'
-        params = self.__reqp.Get(method, endpoint)
+        #params = self.__auth.Get(method, endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         params['data'] = json.dumps({"name": name, "description": description, "homepage": homepage})
-        web.log.Log.Log().Logger.debug(urllib.parse.urljoin("https://api.github.com", endpoint))
-        web.log.Log.Log().Logger.debug(params)
-        r = requests.post(urllib.parse.urljoin("https://api.github.com", endpoint), **params)
+        Log().Logger.debug(urllib.parse.urljoin("https://api.github.com", endpoint))
+        Log().Logger.debug(params)
+        url = Endpoint(endpoint).ToUrl()
+        #r = requests.post(urllib.parse.urljoin("https://api.github.com", endpoint), **params)
+        r = requests.post(url, **params)
         return self.__response.Get(r)
         
     def gets(self, visibility=None, affiliation=None, type=None, sort='full_name', direction=None, per_page=30):
@@ -40,15 +45,22 @@ class Repositories:
         else:
             self.__raise_param_error(direction, ['asc', 'desc'], 'direction')
 
+        method = 'GET'
+        endpoint = 'user/repos'
+        #url = urllib.parse.urljoin('https://api.github.com', 'user/repos')
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        params.update(self.__GetCreateParameter(visibility, affiliation, type, sort, direction, per_page))
+        #params = self.__GetCreateParameter(visibility, affiliation, type, sort, direction, per_page)
+        url = Endpoint(endpoint).ToUrl()
         paginator = web.http.Paginator.Paginator(web.service.github.api.v3.Response.Response())
-        url = urllib.parse.urljoin('https://api.github.com', 'user/repos')
-        params = self.__GetCreateParameter(visibility, affiliation, type, sort, direction, per_page)
         return paginator.Paginate(url, **params)
 
     def __GetCreateParameter(self, visibility=None, affiliation=None, type=None, sort='full_name', direction=None, per_page=30):
-        method = 'GET'
-        endpoint = 'user/repos'
-        params = self.__reqp.Get(method, endpoint)
+        #method = 'GET'
+        #endpoint = 'user/repos'
+        #params = self.__auth.Get(method, endpoint)
+        #params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        params = {}
         params['headers'].update({'Accept': 'application/vnd.github.drax-preview+json'})
         params['params'] = {}
         if not(None is visibility):
@@ -63,7 +75,7 @@ class Repositories:
             params['params']["direction"] = direction
         if not(None is per_page):
             params['params']["per_page"] = per_page
-        web.log.Log.Log().Logger.debug(params)
+        Log().Logger.debug(params)
         return params
 
     def __raise_param_error(self, target, check_list, target_name):
@@ -77,11 +89,14 @@ class Repositories:
     def list_public_repos(self, since, per_page=30):
         method = 'GET'
         endpoint = 'repositories'
-        params = self.__reqp.Get(method, endpoint)
+        #params = self.__auth.Get(method, endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         params['params'] = json.dumps({"since": since, "per_page": per_page})
         print(params)
-        web.log.Log.Log().Logger.debug(params)
-        r = requests.get(urllib.parse.urljoin("https://api.github.com", endpoint), **params)
+        Log().Logger.debug(params)
+        #r = requests.get(urllib.parse.urljoin("https://api.github.com", endpoint), **params)
+        url = Endpoint(endpoint).ToUrl()
+        r = requests.get(url, **params)
         return self.__response.Get(r)
 
     """
@@ -94,10 +109,13 @@ class Repositories:
         if None is repo_name:
             repo_name = os.path.basename(self.__args.path_dir_pj)
         endpoint = 'repos/:owner/:repo'
-        params = self.__reqp.Get('DELETE', endpoint)
-        endpoint = endpoint.replace(':owner', username)
-        endpoint = endpoint.replace(':repo', repo_name)
-        r = requests.delete(urllib.parse.urljoin("https://api.github.com", endpoint), **params)
+        #params = self.__auth.Get('DELETE', endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        #endpoint = endpoint.replace(':owner', username)
+        #endpoint = endpoint.replace(':repo', repo_name)
+        #r = requests.delete(urllib.parse.urljoin("https://api.github.com", endpoint), **params)
+        url = Endpoint(endpoint).ToUrl(owner=username, repo=repo_name)
+        r = requests.delete(url, **params)
         return self.__response.Get(r)
 
     """
@@ -114,9 +132,10 @@ class Repositories:
             homepage = self.__args.homepage
 
         endpoint = 'repos/:owner/:repo'
-        params = self.__reqp.Get('PATCH', endpoint)
-        endpoint = endpoint.replace(':owner', self.__args.username)
-        endpoint = endpoint.replace(':repo', os.path.basename(self.__args.path_dir_pj))
+        #params = self.__auth.Get('PATCH', endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        #endpoint = endpoint.replace(':owner', self.__args.username)
+        #endpoint = endpoint.replace(':repo', os.path.basename(self.__args.path_dir_pj))
         params['data'] = {}
         params['data']['name'] = name
         if not(None is description or '' == description):
@@ -124,10 +143,11 @@ class Repositories:
         if not(None is homepage or '' == homepage):
             params['data']['homepage'] = homepage
         params['data'] = json.dumps(params['data'])
-        url = urllib.parse.urljoin("https://api.github.com", endpoint)
-        web.log.Log.Log().Logger.debug(url)
-        web.log.Log.Log().Logger.debug(params['headers'])
-        web.log.Log.Log().Logger.debug(params['data'])
+        #url = urllib.parse.urljoin("https://api.github.com", endpoint)
+        url = Endpoint(endpoint).ToUrl(owner=self.__args.username, repo=os.path.basename(self.__args.path_dir_pj))
+        Log().Logger.debug(url)
+        Log().Logger.debug(params['headers'])
+        Log().Logger.debug(params['data'])
         r = requests.patch(url, **params)
         return self.__response.Get(r)
         
@@ -143,10 +163,13 @@ class Repositories:
         if None is repo_name:
             repo_name = os.path.basename(self.__args.path_dir_pj)
         endpoint = 'repos/:owner/:repo/languages'
-        params = self.__reqp.Get('GET', endpoint)
-        endpoint = endpoint.replace(':owner', username)
-        endpoint = endpoint.replace(':repo', repo_name)
-        web.log.Log.Log().Logger.debug(endpoint)
-        r = requests.get(urllib.parse.urljoin("https://api.github.com", endpoint), **params)
+        #params = self.__auth.Get('GET', endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        #endpoint = endpoint.replace(':owner', username)
+        #endpoint = endpoint.replace(':repo', repo_name)
+        Log().Logger.debug(endpoint)
+        #r = requests.get(urllib.parse.urljoin("https://api.github.com", endpoint), **params)
+        url = Endpoint(endpoint).ToUrl(owner=username, repo=repo_name)
+        r = requests.get(url, **params)
         return self.__response.Get(r)
 

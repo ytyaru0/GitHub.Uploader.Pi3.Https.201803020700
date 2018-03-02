@@ -5,7 +5,9 @@ import datetime
 import time
 import json
 import web.service.github.api.v3.Response
-import web.log.Log
+from web.log.Log import Log
+from web.service.github.uri.Endpoint import Endpoint
+
 class Users:
     def __init__(self, reqp, response):
         self.__reqp = reqp
@@ -14,9 +16,11 @@ class Users:
     def Get(self):
         method = 'GET'
         endpoint = 'users/:username'
-        params = self.__reqp.Get(method, endpoint)
-        url = 'https://api.github.com/users/{username}'.format(username=username)
-        web.log.Log.Log().Logger.debug(url)
+        #params = self.__reqp.Get(method, endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        #url = 'https://api.github.com/users/{username}'.format(username=username)
+        url = Endpoint(endpoint).ToUrl(username=username)
+        Log().Logger.debug(url)
         r = requests.get(url, **params)
         return self.__response.Get(r)
 

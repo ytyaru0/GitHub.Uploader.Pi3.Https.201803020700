@@ -6,7 +6,9 @@ import time
 import json
 import web.http.Paginator
 import web.service.github.api.v3.Response
-import web.log.Log
+from web.log.Log import Log
+from web.service.github.uri.Endpoint import Endpoint
+
 class SshKeys(object):
     def __init__(self, reqp, response):
         self.__reqp = reqp
@@ -19,29 +21,35 @@ class SshKeys(object):
     """
     def Create(self, public_key, title=None):
         method = 'POST'
-        endpoint = 'users/:username/keys'
-        params = self.__reqp.Get(method, endpoint)
+        endpoint = 'user/keys'
+        #params = self.__reqp.Get(method, endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         params['data'] = json.dumps({'title': title, 'key': public_key})
-        url = 'https://api.github.com/user/keys'
-        web.log.Log.Log().Logger.debug(url)
-        web.log.Log.Log().Logger.debug(params)
+        #url = 'https://api.github.com/user/keys'
+        url = Endpoint(endpoint).ToUrl()
+        Log().Logger.debug(url)
+        Log().Logger.debug(params)
         r = requests.post(url, **params)
         return self.__response.Get(r)
         
     def Gets(self, username):
         method = 'GET'
         endpoint = 'users/:username/keys'
-        params = self.__reqp.Get(method, endpoint)
+        #params = self.__reqp.Get(method, endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         paginator = web.http.Paginator.Paginator(web.service.github.api.v3.Response.Response())
-        url = 'https://api.github.com/users/{username}/keys'.format(username=username)
+        #url = 'https://api.github.com/users/{username}/keys'.format(username=username)
+        url = Endpoint(endpoint).ToUrl(username=username)
         return paginator.Paginate(url, **params)
 
     def Get(self, key_id):
         method = 'GET'
         endpoint = 'user/keys/:id'
-        params = self.__reqp.Get(method, endpoint)
-        url = 'https://api.github.com/user/keys/{key_id}'.format(key_id=key_id)
-        web.log.Log.Log().Logger.debug(url)
+        #params = self.__reqp.Get(method, endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        #url = 'https://api.github.com/user/keys/{key_id}'.format(key_id=key_id)
+        url = Endpoint(endpoint).ToUrl(id=key_id)
+        Log().Logger.debug(url)
         r = requests.get(url, **params)
         return self.__response.Get(r)
         
@@ -52,9 +60,11 @@ class SshKeys(object):
     def Delete(self, key_id):
         method = 'DELETE'
         endpoint = 'user/keys/:id'
-        params = self.__reqp.Get(method, endpoint)
-        url = 'https://api.github.com/user/keys/{key_id}'.format(key_id=key_id)
-        web.log.Log.Log().Logger.debug(url)
+        #params = self.__reqp.Get(method, endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        #url = 'https://api.github.com/user/keys/{key_id}'.format(key_id=key_id)
+        url = Endpoint(endpoint).ToUrl(id=key_id)
+        Log().Logger.debug(url)
         r = requests.delete(url, **params)
         return self.__response.Get(r)
 

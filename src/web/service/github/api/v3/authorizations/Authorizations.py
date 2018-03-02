@@ -6,6 +6,8 @@ import time
 import json
 import web.service.github.api.v3.Response
 import web.log.Log
+from web.service.github.uri.Endpoint import Endpoint
+
 class Authorizations:
     def __init__(self, auth, response):
         self.__auth = auth
@@ -30,9 +32,10 @@ class Authorizations:
 
         method = 'POST'
         endpoint = 'authorizations'
-        params = self.__auth.Route(method, endpoint).GetHeaders()
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         params['data'] = json.dumps(data)
-        url = 'https://api.github.com/' + endpoint
+        #url = 'https://api.github.com/' + endpoint
+        url = Endpoint(endpoint).ToUrl()
         web.log.Log.Log().Logger.debug(url)
         web.log.Log.Log().Logger.debug(params)
         r = requests.post(url, **params)
@@ -41,8 +44,9 @@ class Authorizations:
     def Gets(self):
         method = 'GET'
         endpoint = 'authorizations'
-        url = 'https://api.github.com/' + endpoint
-        params = self.__auth.Route(method, endpoint).GetHeaders()
+        #url = 'https://api.github.com/' + endpoint
+        url = Endpoint(endpoint).ToUrl()
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         web.log.Log.Log().Logger.debug(url)
         web.log.Log.Log().Logger.debug(params)
         r = requests.get(url, **params)
@@ -51,8 +55,9 @@ class Authorizations:
     def Get(self, auth_id):
         method = 'GET'
         endpoint = 'authorizations/:id'
-        params = self.__auth.Route(method, endpoint).GetHeaders()
-        url = 'https://api.github.com/authorizations/{0}'.format(auth_id)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        #url = 'https://api.github.com/authorizations/{0}'.format(auth_id)
+        url = Endpoint(endpoint).ToUrl(id=auth_id)
         web.log.Log.Log().Logger.debug(url)
         web.log.Log.Log().Logger.debug(params)
         r = requests.get(url, **params)
@@ -61,8 +66,9 @@ class Authorizations:
     def Delete(self, auth_id):
         method = 'DELETE'
         endpoint = 'authorizations/:id'
-        params = self.__auth.Route(method, endpoint).GetHeaders()
-        url = 'https://api.github.com/authorizations/{auth_id}'.format(auth_id=auth_id)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        #url = 'https://api.github.com/authorizations/{auth_id}'.format(auth_id=auth_id)
+        url = Endpoint(endpoint).ToUrl(id=auth_id)
         web.log.Log.Log().Logger.debug(url)
         web.log.Log.Log().Logger.debug(params)
         r = requests.delete(url, **params)

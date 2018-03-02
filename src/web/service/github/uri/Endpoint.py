@@ -3,9 +3,6 @@
 import urllib.parse
 
 class Endpoint:
-    class NotHasKeyException(Exception):
-        def __init__(self, endpoint, key):
-            super().__init__('API Endpoint に必要な引数 {1} がありません。{1}キーとその値をセットしたdictを用意してください。: {0}'.format(endpoint, key))
     def __init__(self, endpoint):
         self.__endpoint = endpoint
         self.__keys = None
@@ -32,6 +29,10 @@ class Endpoint:
             if key not in self.Keys: raise Endpoint.NotHasKeyException(self.__endpoint, key)
             url = url.replace(':'+key, str(kwargs[key]))
         return url
+
+    class NotHasKeyException(Exception):
+        def __init__(self, endpoint, key):
+            super().__init__('API Endpoint に必要な引数 {1} がありません。{1}キーとその値をセットしたdictを用意してください。: {0}'.format(endpoint, key))
 
 
 if __name__ == '__main__':

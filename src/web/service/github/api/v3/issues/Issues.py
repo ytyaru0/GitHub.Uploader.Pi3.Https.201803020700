@@ -6,10 +6,13 @@ import json
 import datetime
 import web.http.Paginator
 import web.service.github.api.v3.Response
-import web.log.Log
+from web.log.Log import Log
+#import web.log.Log
+from web.service.github.uri.Endpoint import Endpoint
+
 class Issues:
-    def __init__(self, reqp, response, args):
-        self.__reqp = reqp
+    def __init__(self, auth, response, args):
+        self.__auth = auth
         self.__response = response
         self.__args = args
 
@@ -21,18 +24,30 @@ class Issues:
         
         method = 'POST'
         endpoint = 'repos/:owner/:repo/issues'
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        url = Endpoint(endpoint).ToUrl(owner=self.__args.username, repo=os.path.basename(self.__args.path_dir_pj))
+
+        Log().Logger.debug(urllib.parse.urljoin(url))
+        Log().Logger.debug(params)
+        r = requests.post(urllib.parse.urljoin(url), **params)
+
+        return self.__response.Get(r)
+        """
+        method = 'POST'
+        endpoint = 'repos/:owner/:repo/issues'
         endpoint = endpoint.replace(':owner', self.__args.username)
         print(self.__repo)
         endpoint = endpoint.replace(':repo', os.path.basename(self.__args.path_dir_pj))
         print(endpoint)
-        params = self.__reqp.Get(method, endpoint)
+        #params = self.__auth.Get(method, endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         if 'data' in params: params['data'].update(json.dumps(method_params))
         else: params['data'] = json.dumps(method_params)
 #        print(params)
-        web.log.Log.Log().Logger.debug(urllib.parse.urljoin("https://api.github.com", endpoint))
-        web.log.Log.Log().Logger.debug(params)
+        Log().Logger.debug(urllib.parse.urljoin("https://api.github.com", endpoint))
+        Log().Logger.debug(params)
         r = requests.post(urllib.parse.urljoin("https://api.github.com", endpoint), **params)
-        return self.__response.Get(r)
+        """
 
     """
     Issueを編集する。
@@ -61,13 +76,26 @@ class Issues:
         if None is title: title = '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())
         method_params = {k:v for k, v in locals().items() if None is not v and 'self' != k and 'method_params' != k}
         print(method_params)
-        
+
+        method = 'GET'
+        endpoint = 'repos/:owner/:repo/issues'
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
+        if 'params' in params: params['params'].update(method_params)
+        else: params['params'] = method_params
+        print(params)
+
+        paginator = web.http.Paginator.Paginator(web.service.github.api.v3.Response.Response())
+        url = Endpoint(endpoint).ToUrl(owner=self.__args.username, repo=os.path.basename(self.__args.path_dir_pj))
+        return paginator.Paginate(url, **params)
+
+        """
         method = 'GET'
         endpoint = 'repos/:owner/:repo/issues'
         endpoint = endpoint.replace(':owner', self.__args.username)
         endpoint = endpoint.replace(':repo', os.path.basename(self.__args.path_dir_pj))
         print(endpoint)
-        params = self.__reqp.Get(method, endpoint)
+        #params = self.__auth.Get(method, endpoint)
+        params = self.__auth.Route(method, endpoint).GetRequestParameters()
         if 'params' in params: params['params'].update(method_params)
         else: params['params'] = method_params
         print(params)
@@ -75,6 +103,7 @@ class Issues:
         paginator = web.http.Paginator.Paginator(web.service.github.api.v3.Response.Response())
         url = urllib.parse.urljoin('https://api.github.com', endpoint)
         return paginator.Paginate(url, **params)
+        """
     
     """
     指定ユーザのIssueを取得する。
