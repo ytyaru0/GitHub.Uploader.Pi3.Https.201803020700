@@ -1,0 +1,22 @@
+# https://code.i-harness.com/ja/q/1107f64
+# INI,CSV,XML,JSON,YAMLどれも面倒。改行とインデントだけのテキストからdictを作りたい。
+
+Path:
+    Db: ./res/db/
+
+# HTTPS or SSH。未定義や不正値ならHTTPS。
+# $ git remote add origin {SSH/HTTPS}
+#     SSH  : git@{ssh_host}:{user}/{repo}.git
+#     HTTPS: https://{user}:{pass}@github.com/{user}/{repo}.git
+Git:
+    Remote: HTTPS
+
+# is_make, is_uploadは未実装
+# auto, 1, true, on、の値で草データを自動収集する
+Github:
+    User: ytyaru
+    Contributions:
+        IsGet: auto
+        IsMake: auto
+        IsUpload: auto
+
